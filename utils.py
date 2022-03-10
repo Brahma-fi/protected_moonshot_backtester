@@ -9,4 +9,72 @@ def ftxTransformer(data):
     outputData.sort_values(by=['endTime'],inplace=True)
     outputData.set_index('endTime',inplace=True)
     outputData['volatility'] = outputData.close.pct_change().ewm(alpha=0.4).std()
-    return outputData
+    
+    weeklyData = outputData.resample('7d',offset = '8h',label='right').agg({'open':'first','close':'last','high':'max','low':'min'})
+    
+    # drop this as last week data is extrapolated
+    weeklyData.drop(index=weeklyData.index[-1], 
+        axis=0, 
+        inplace=True)
+    weeklyData['price_change'] = weeklyData['close'] / weeklyData['open']  - 1
+    weeklyData = weeklyData.dropna()
+
+    return outputData,weeklyData
+
+
+
+
+
+
+
+
+
+
+def chainlinkTransformer(data):
+    data['endTime'] =  (pd.to_datetime(data['updatedAt'].copy(),unit='s'))
+    data.drop(['updatedAt','startedAt','roundId','roundId.1'],axis=1,inplace=True)
+    data['price'] = data['price'].copy() / 1e8
+    data.sort_values(by=['endTime'],inplace=True)
+    data.set_index('endTime',inplace=True)
+    data['index_twap'] = data.rolling('15min').mean()
+    
+    #generate weeklyData
+    opens = data.price.resample('7d',offset = '8h',label='right').first()
+    opens.rename('open',inplace=True)
+    mins = data.index_twap.resample('7d',offset = '8h',label='right').min()
+    mins.rename('low',inplace=True)
+    maxs = data.index_twap.resample('7d',offset = '8h',label='right').max()
+    maxs.rename('high',inplace=True)
+    
+    weeklyData = pd.concat([opens,maxs,mins],axis=1)
+    weeklyData['close'] = weeklyData.open.shift(-1)
+    weeklyData = weeklyData[['open','close','high','low']]
+    # drop this as last week data is extrapolated
+    weeklyData.drop(index=weeklyData.index[-1], 
+            axis=0, 
+            inplace=True)
+    
+    weeklyData['price_change'] = weeklyData['close'] / weeklyData['open']  - 1
+    
+
+    #generate hourlyData
+    opens = data.price.resample('1h',offset = '8h',label='right').first()
+    opens.rename('open',inplace=True)
+    mins = data.index_twap.resample('1h',offset = '8h',label='right').min()
+    mins.rename('low',inplace=True)
+    maxs = data.index_twap.resample('1h',offset = '8h',label='right').max()
+    maxs.rename('high',inplace=True)
+    
+    hourlyData = pd.concat([opens,maxs,mins],axis=1)
+    hourlyData['close'] = hourlyData.open.shift(-1)
+    hourlyData = hourlyData[['open','close','high','low']]
+    # drop this as last week data is extrapolated
+    hourlyData.drop(index=hourlyData.index[-1], 
+            axis=0, 
+            inplace=True)
+    
+    
+    
+    
+    
+    return data,weeklyData,hourlyData
