@@ -15,7 +15,7 @@ In terms of the python files:
 
 In order to run the backtest for the strategy use the two notebooks:
 
-- [moonshot_simple.ipynb](https://github.com/Brahma-fi/protected_moonshot_backtester/blob/master/moonshots_simple.ipynb) runs the analysis for the simple strategy explained in the [Protected Moonshot Blog Post](). 
-- [moonshot_enhanced.ipynb](https://github.com/Brahma-fi/protected_moonshot_backtester/blob/master/moonshots_enhanced.ipynb) runs the analysis for the enhanced strategy explained in the [Protected Moonshot Blog Post]()
+- [moonshot_simple.ipynb](https://github.com/Brahma-fi/protected_moonshot_backtester/blob/master/moonshots_simple.ipynb) runs the analysis for the simple strategy explained in the [Protected Moonshot Blog Post](https://blog.brahma.fi/launching-protected-moonshot-degenvault/). 
+- [moonshot_enhanced.ipynb](https://github.com/Brahma-fi/protected_moonshot_backtester/blob/master/moonshots_enhanced.ipynb) runs the analysis for the enhanced strategy explained in the [Protected Moonshot Blog Post](https://blog.brahma.fi/launching-protected-moonshot-degenvault/)
 
  
