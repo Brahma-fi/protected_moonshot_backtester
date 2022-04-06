@@ -78,3 +78,40 @@ def chainlinkTransformer(data):
     
     
     return data,weeklyData,hourlyData
+
+
+def dvolTransformer(data):
+    data['endTime'] = pd.to_datetime(data['date'].copy(),utc=True)
+    data.set_index('endTime',inplace=True)
+    data.rename(columns = {'open':'dvol_open','close':'dvol_close'},inplace=True)
+    data.drop(['date','high','low'],axis=1,inplace=True)
+    hourlyData = data.copy()
+    
+    weeklyData = hourlyData.resample('7d',offset = '8h',label='right').agg({'dvol_open':'first','dvol_close':'last'})
+
+    #drop last row which is interpolated
+    weeklyData.drop(index=weeklyData.index[-1], 
+        axis=0, 
+        inplace=True)
+
+
+    return hourlyData,weeklyData
+
+
+def skewDataTransformer(data):
+    data['endTime'] = pd.to_datetime(data['DateTime'].copy(),utc=True)
+    data.set_index('endTime',inplace=True)
+    data.drop(['DateTime'],axis=1,inplace=True)
+    data.rename(columns={'1wk ATM Vol':'open'},inplace=True)
+    data['close'] = data.open.shift(-1) 
+    hourlyData = data.copy()
+    
+    weeklyData = hourlyData.resample('7d',offset = '8h',label='right').agg({'open':'first','close':'last'})
+
+    #drop last row which is interpolated
+    weeklyData.drop(index=weeklyData.index[-1], 
+        axis=0, 
+        inplace=True)
+
+
+    return hourlyData,weeklyData
